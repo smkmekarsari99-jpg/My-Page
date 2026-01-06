@@ -11,7 +11,7 @@ import {
 import { relations } from "drizzle-orm";
 
 // --- 1. ENUMS (Agar data konsisten) ---
-export const roleEnum = pgEnum("role", ["admin", "guru", "siswa"]);
+export const roleEnum = pgEnum("role", ["admin", "guru", "siswa", "staff"]);
 export const attendanceStatusEnum = pgEnum("attendance_status", [
   "hadir",
   "sakit",
