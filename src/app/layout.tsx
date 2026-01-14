@@ -1,14 +1,12 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist } from "next/font/google"; // Asumsi font Geist sudah terinstall
 import "./globals.css";
+import { Navbar } from "@/src/components/navbar";
+import { Footer } from "@/src/components/footer";
+import { Toaster } from "sonner"; // Toast notification
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
   subsets: ["latin"],
 });
 
@@ -23,11 +21,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="id" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.className} flex min-h-screen flex-col antialiased`}
       >
-        {children}
+        {/* Navbar di atas */}
+        <Navbar />
+
+        {/* Konten Utama (akan memanjang mengisi ruang kosong) */}
+        <main className="flex-1">{children}</main>
+
+        {/* Footer di bawah */}
+        <Footer />
+
+        {/* Komponen Utility */}
+        <Toaster position="top-center" />
       </body>
     </html>
   );
