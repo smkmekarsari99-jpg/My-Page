@@ -7,6 +7,7 @@ import {
   boolean,
   pgEnum,
   date,
+  uuid, // Pastikan ini terimport
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -21,10 +22,10 @@ export const attendanceStatusEnum = pgEnum("attendance_status", [
 
 // --- 2. AUTHENTICATION & USERS ---
 export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
+  id: uuid("id").primaryKey(), // ✅ SUDAH BENAR (UUID)
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
-  password: text("password"), // Nullable jika nanti login via Google
+  password: text("password"),
   role: roleEnum("role").default("siswa").notNull(),
   image: text("image"),
   isActive: boolean("is_active").default(true),
@@ -35,38 +36,40 @@ export const users = pgTable("users", {
 // --- 3. ACADEMIC STRUCTURE (Kelas & Mapel) ---
 export const classes = pgTable("classes", {
   id: serial("id").primaryKey(),
-  name: text("name").notNull(), // Contoh: "X RPL 1"
-  grade: integer("grade").notNull(), // 10, 11, 12
-  academicYear: text("academic_year").notNull(), // "2024/2025"
+  name: text("name").notNull(),
+  grade: integer("grade").notNull(),
+  academicYear: text("academic_year").notNull(),
 });
 
 export const subjects = pgTable("subjects", {
   id: serial("id").primaryKey(),
-  name: text("name").notNull(), // Contoh: "Matematika Wajib"
-  code: text("code").unique(), // "MTK-01"
+  name: text("name").notNull(),
+  code: text("code").unique(),
 });
 
 // --- 4. PROFILES (Data Detail) ---
 // Profile Guru
 export const teacherProfiles = pgTable("teacher_profiles", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id")
+  // 🔴 PERBAIKAN DI SINI: integer -> uuid
+  userId: uuid("user_id")
     .references(() => users.id, { onDelete: "cascade" })
     .notNull(),
   nip: text("nip").unique(),
-  specialization: text("specialization"), // Bidang studi
+  specialization: text("specialization"),
 });
 
 // Profile Siswa
 export const studentProfiles = pgTable("student_profiles", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id")
+  // 🔴 PERBAIKAN DI SINI: integer -> uuid
+  userId: uuid("user_id")
     .references(() => users.id, { onDelete: "cascade" })
     .notNull(),
-  classId: integer("class_id").references(() => classes.id), // Relasi ke Kelas
+  classId: integer("class_id").references(() => classes.id),
   nisn: text("nisn").unique(),
   address: text("address"),
-  gender: text("gender"), // "L" or "P"
+  gender: text("gender"),
 });
 
 // --- 5. OPERATIONAL (Absensi) ---
@@ -77,13 +80,12 @@ export const attendance = pgTable("attendance", {
     .notNull(),
   date: date("date").defaultNow().notNull(),
   status: attendanceStatusEnum("status").notNull(),
-  notes: text("notes"), // Keterangan tambahan
-  recordedBy: integer("recorded_by").references(() => users.id), // Siapa yg input (Guru/Admin)
+  notes: text("notes"),
+  // ✅ Bagian ini Anda sudah benar sebelumnya (uuid)
+  recordedBy: uuid("recorded_by").references(() => users.id),
 });
 
-// --- 6. RELATIONS (Untuk Query Drizzle API) ---
-// Ini mempermudah query: db.query.users.findMany({ with: { studentProfile: true } })
-
+// --- 6. RELATIONS ---
 export const usersRelations = relations(users, ({ one }) => ({
   teacherProfile: one(teacherProfiles, {
     fields: [users.id],
