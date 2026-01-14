@@ -1,6 +1,6 @@
 // src/lib/validators/schema.ts
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { posts, programs } from "../../db/schema";
+import { posts, programs } from "@/src/db/schema";
 import { z } from "zod";
 
 // Schema untuk Insert Data (Validasi Form)
