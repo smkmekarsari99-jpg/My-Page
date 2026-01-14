@@ -1,12 +1,9 @@
-// File: src/db/index.ts
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import * as authSchema from "@/src/features/login/_db/schema";
-import * as landingSchema from "@/src/features/landing-page/db/schema";
+// ✅ Cukup import satu file schema utama ini saja
+import * as schema from "./schema";
 
-// --- PERUBAHAN DI SINI ---
-// Kita buat logika fallback. Prioritaskan DATABASE_URL (lokal),
-// kalau tidak ada, ambil POSTGRES_URL (Vercel).
+// Logika fallback URL (Vercel/Lokal) - Ini sudah bagus, pertahankan.
 const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
 
 if (!connectionString) {
@@ -16,11 +13,7 @@ if (!connectionString) {
 const pool = new Pool({
   connectionString: connectionString,
 });
-// -------------------------
 
-export const db = drizzle(pool, {
-  schema: {
-    ...authSchema,
-    ...landingSchema,
-  },
-});
+// ✅ KUNCI PERBAIKAN:
+// Masukkan variabel 'schema' langsung. Tidak perlu di-spread (...) lagi.
+export const db = drizzle(pool, { schema });

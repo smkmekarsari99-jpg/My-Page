@@ -5,10 +5,7 @@ import * as dotenv from "dotenv";
 dotenv.config({ path: ".env" });
 
 export default defineConfig({
-  schema: [
-    "./src/features/login/_db/schema.ts",
-    "./src/features/landing-page/db/schema.ts",
-  ],
+  schema: ["./src/db/schema.ts"],
   out: "./drizzle", // Folder output untuk file migrasi (nanti otomatis dibuat)
   dialect: "postgresql", // Jenis database
   dbCredentials: {

@@ -1,13 +1,23 @@
-import "dotenv/config"; // Cukup satu kali import dotenv
-import { db } from "@/src/db/index";
-import { users } from "./schema";
-import bcrypt from "bcryptjs";
+import "dotenv/config";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
+import * as schema from "./schema"; // ✅ Import schema gabungan
 import { createClient } from "@supabase/supabase-js";
+import bcrypt from "bcryptjs";
 
-// Setup Supabase Admin Client
+// 1. Setup Database Connection (Langsung di sini agar mandiri)
+const connectionString = process.env.DATABASE_URL;
+if (!connectionString) throw new Error("DATABASE_URL is not defined");
+
+const client = postgres(connectionString, { max: 1 });
+const db = drizzle(client, { schema });
+
+// 2. Setup Supabase Admin Client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-// PENTING: Gunakan SERVICE_ROLE_KEY, bukan Anon Key
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!; // Wajib ada di .env
+
+if (!supabaseServiceKey)
+  throw new Error("SUPABASE_SERVICE_ROLE_KEY is missing!");
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey, {
   auth: {
@@ -20,14 +30,14 @@ async function main() {
   console.log("⏳ Sedang memproses seeding data...");
 
   const adminEmail = "admin@sekolah.com";
-  const rawPassword = "PasswordAdmin123!"; // Password asli untuk login
+  const rawPassword = "PasswordAdmin123!"; // Password untuk login
 
   // ---------------------------------------------------------
   // LANGKAH 1: Buat User di Supabase Auth (auth.users)
   // ---------------------------------------------------------
   console.log("   --> Mendaftarkan ke Supabase Auth...");
 
-  // Cek dulu apakah user sudah ada untuk mencegah error
+  // Cek user di Auth Supabase
   const { data: listUsers } = await supabase.auth.admin.listUsers();
   const existingUser = listUsers.users.find((u) => u.email === adminEmail);
 
@@ -38,7 +48,7 @@ async function main() {
       await supabase.auth.admin.createUser({
         email: adminEmail,
         password: rawPassword,
-        email_confirm: true, // Langsung verifikasi email
+        email_confirm: true,
         user_metadata: { role: "admin" },
       });
 
@@ -46,36 +56,32 @@ async function main() {
       throw new Error(`Gagal buat Auth User: ${authError.message}`);
     }
     userId = authData.user.id;
+    console.log("   --> User Auth baru berhasil dibuat.");
   } else {
-    console.log(
-      "   --> User Auth sudah ada, melanjutkan update data public...",
-    );
+    console.log("   --> User Auth sudah ada, melanjutkan...");
   }
 
   // ---------------------------------------------------------
   // LANGKAH 2: Masukkan ke Tabel Public (public.users)
   // ---------------------------------------------------------
-  console.log("   --> Menyimpan ke database aplikasi...");
+  console.log("   --> Menyimpan ke database aplikasi (public.users)...");
 
-  // Kita tetap hash password jika kolom tabel Anda mewajibkannya,
-  // tapi ingat: login Supabase pakai password asli, bukan hash ini.
   const hashedPassword = await bcrypt.hash(rawPassword, 10);
 
-  // Gunakan .onConflictDoUpdate jika Anda ingin seed bisa dijalankan berulang kali
-  // atau cek manual seperti di bawah:
-
+  // Menggunakan schema.users yang baru
   await db
-    .insert(users)
+    .insert(schema.users)
     .values({
-      id: userId, // <--- PENTING: ID harus sama dengan Supabase Auth ID
+      id: userId!, // ID harus sama dengan Supabase Auth
       name: "Admin Utama",
       email: adminEmail,
-      password: hashedPassword, // Opsional: sebenarnya tidak perlu disimpan di sini jika pakai Supabase Auth
+      password: hashedPassword,
       role: "admin",
       isActive: true,
+      // image: "", // Opsional
     })
     .onConflictDoUpdate({
-      target: users.email, // Pastikan kolom email unique di schema.ts
+      target: schema.users.email,
       set: {
         password: hashedPassword,
         role: "admin",
@@ -86,11 +92,14 @@ async function main() {
   console.log("✅ Berhasil! Akun Admin siap digunakan.");
   console.log(`   Email: ${adminEmail}`);
   console.log(`   Pass : ${rawPassword}`);
-
-  process.exit(0);
 }
 
-main().catch((err) => {
-  console.error("❌ Terjadi Error:", err);
-  process.exit(1);
-});
+main()
+  .catch((err) => {
+    console.error("❌ Terjadi Error:", err);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await client.end(); // Tutup koneksi database
+    process.exit(0);
+  });

@@ -5,13 +5,10 @@ import { useActionState } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { useRef } from "react";
+import { type InferSelectModel } from "drizzle-orm";
+import { users } from "@/src/db/schema"; // Import schema users
 
-type User = {
-  id: number;
-  name: string;
-  email: string;
-  role: "admin" | "guru" | "siswa" | "staff";
-};
+type User = InferSelectModel<typeof users>;
 
 export default function EditUserForm({ user }: { user: User }) {
   const initialState = { message: "", errors: {} };
