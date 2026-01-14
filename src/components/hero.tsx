@@ -34,7 +34,6 @@ export function HeroSection() {
             opacity: 1,
             duration: 0.8,
             stagger: 0.15,
-            clearProps: "all",
           },
           "-=1.0",
         );

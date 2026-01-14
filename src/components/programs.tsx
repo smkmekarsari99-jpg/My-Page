@@ -100,19 +100,25 @@ export function ProgramsSection() {
           </p>
         </div>
 
-        {/* Tabs System */}
-        <Tabs defaultValue="smk" className="mx-auto w-full max-w-5xl">
-          <div className="mb-8 flex justify-center">
-            <TabsList className="grid w-full max-w-md grid-cols-2 bg-slate-200/50 p-1 dark:bg-slate-800">
+        {/* Tabs System - UPDATE BAGIAN INI */}
+        <Tabs
+          defaultValue="smk"
+          className="mx-auto flex w-full max-w-5xl flex-col items-center"
+        >
+          <div className="mb-10 flex w-full justify-center">
+            <TabsList className="grid h-auto w-full max-w-[400px] grid-cols-2 rounded-full bg-slate-200/60 p-1.5 dark:bg-slate-800">
+              {/* Tombol Unit SMP */}
               <TabsTrigger
                 value="smp"
-                className="py-2 text-base data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                className="rounded-full py-3 text-sm font-semibold transition-all duration-300 data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-md"
               >
                 Unit SMP
               </TabsTrigger>
+
+              {/* Tombol Unit SMK */}
               <TabsTrigger
                 value="smk"
-                className="py-2 text-base data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                className="rounded-full py-3 text-sm font-semibold transition-all duration-300 data-[state=active]:bg-white data-[state=active]:text-emerald-600 data-[state=active]:shadow-md"
               >
                 Unit SMK
               </TabsTrigger>
@@ -147,7 +153,6 @@ export function ProgramsSection() {
                 </motion.div>
               ))}
             </div>
-            {/* CTA SMP */}
             <div className="mt-8 text-center">
               <p className="text-muted-foreground text-sm">
                 Masih banyak ekstrakurikuler lainnya seperti Pramuka, Paskibra,
@@ -157,7 +162,8 @@ export function ProgramsSection() {
           </TabsContent>
 
           {/* Konten SMK */}
-          <TabsContent value="smk" className="mt-0">
+          <TabsContent value="smk" className="mt-0 w-full">
+            {/* ... Isi Konten SMK Anda sebelumnya ... */}
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               {programs.smk.map((item, index) => (
                 <motion.div
