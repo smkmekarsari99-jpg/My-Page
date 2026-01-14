@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/src/db";
-import { users } from "@/src/features/login/_db/schema";
+import { users } from "@/src/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -23,7 +23,6 @@ export type ActionState = {
 
 // --- 2. SCHEMAS (ZOD) ---
 
-// Kita definisikan Enum Role sekali saja agar bisa dipakai ulang (Reusability)
 const RoleEnum = z.enum(["admin", "guru", "siswa", "staff"]);
 
 // Schema untuk CREATE
@@ -31,12 +30,14 @@ const CreateUserSchema = z.object({
   name: z.string().min(3, "Nama minimal 3 karakter"),
   email: z.string().email("Format email tidak valid"),
   password: z.string().min(6, "Password minimal 6 karakter"),
-  role: RoleEnum, // Gunakan enum yang sudah didefinisikan
+  role: RoleEnum,
 });
 
 // Schema untuk UPDATE
 const UpdateUserSchema = z.object({
-  id: z.coerce.number(), // coerce mengubah string '123' jadi number 123
+  // ❌ SALAH LAMA: id: z.coerce.number(),
+  // ✅ BENAR: Gunakan string karena UUID itu string
+  id: z.string(),
   name: z.string().min(3, "Nama minimal 3 karakter"),
   email: z.string().email("Format email tidak valid"),
   role: RoleEnum,
@@ -68,7 +69,6 @@ export async function createUser(
   const { name, email, password, role } = validatedFields.data;
 
   try {
-    // Cek duplikasi email
     const existingUser = await db.query.users.findFirst({
       where: eq(users.email, email),
     });
@@ -82,9 +82,9 @@ export async function createUser(
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Hapus 'as any'. Zod sudah menjamin 'role' adalah "admin" | "guru" | "siswa" | "staff"
-    // Pastikan di schema Drizzle, kolom role tipenya sesuai (varchar atau pgEnum dengan value sama)
     await db.insert(users).values({
+      // ✅ Generate UUID di sini (Sangat Bagus)
+      id: crypto.randomUUID(),
       name,
       email,
       password: hashedPassword,
@@ -105,6 +105,7 @@ export async function updateUser(
   formData: FormData,
 ): Promise<ActionState> {
   const rawData = {
+    // ID diambil sebagai string dari FormData
     id: formData.get("id"),
     name: formData.get("name"),
     email: formData.get("email"),
@@ -128,9 +129,10 @@ export async function updateUser(
       .set({
         name,
         email,
-        role: role, // Tanpa 'as any', Type-safe karena output Zod match dengan Schema
+        role: role,
         updatedAt: new Date(),
       })
+      // ✅ Aman: users.id (string) === id (string)
       .where(eq(users.id, id));
 
     revalidatePath("/dashboard/users");
@@ -143,8 +145,9 @@ export async function updateUser(
 }
 
 // C. DELETE USER
-export async function deleteUser(id: number) {
+export async function deleteUser(id: string) {
   try {
+    // ✅ Aman: parameter id string
     await db.delete(users).where(eq(users.id, id));
     revalidatePath("/dashboard/users");
     return { success: true, message: "User berhasil dihapus" };

@@ -1,5 +1,5 @@
 import { db } from "@/src/db";
-import { users } from "@/src/features/login/_db/schema";
+import { users } from "@/src/db/schema";
 import { desc } from "drizzle-orm";
 import UserTable from "@/src/features/user-management/user-table";
 import { Metadata } from "next";

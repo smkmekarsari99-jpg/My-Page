@@ -1,7 +1,8 @@
 "use server";
 
 import { db } from "@/src/db";
-import { users } from "@/src/features/login/_db/schema";
+// Pastikan path import schema ini benar sesuai struktur folder Anda
+import { users } from "@/src/db/schema";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
@@ -23,8 +24,9 @@ const CreateUserSchema = z.object({
   name: z.string().min(3, { message: "Nama minimal 3 karakter" }),
   email: z.string().email({ message: "Format email tidak valid" }),
   password: z.string().min(6, { message: "Password minimal 6 karakter" }),
-  role: z.enum(["admin", "guru", "siswa"], {
-    message: "Pilih role yang valid (admin, guru, atau siswa)",
+  // Update: Tambahkan 'staff' jika di database Anda ada role staff
+  role: z.enum(["admin", "guru", "siswa", "staff"], {
+    message: "Pilih role yang valid",
   }),
 });
 
@@ -44,7 +46,6 @@ export async function createUser(
 
   if (!validatedFields.success) {
     return {
-      // Zod mengembalikan array of strings untuk setiap field
       error: validatedFields.error.flatten().fieldErrors,
       message: "Gagal validasi data. Periksa inputan Anda.",
     };
@@ -62,7 +63,6 @@ export async function createUser(
     if (existingUser.length > 0) {
       return {
         message: "Email sudah digunakan user lain.",
-        // Kita kembalikan object error kosong agar sesuai tipe
         error: {},
       };
     }
@@ -70,6 +70,7 @@ export async function createUser(
     const hashedPassword = await bcrypt.hash(password, 10);
 
     await db.insert(users).values({
+      id: crypto.randomUUID(),
       name,
       email,
       password: hashedPassword,
@@ -86,12 +87,13 @@ export async function createUser(
   revalidatePath("/dashboard/users");
   redirect("/dashboard/users");
 
-  // TypeScript butuh return di akhir function path,
-  // meskipun redirect di atas akan melempar error (NEXT_REDIRECT)
+  // Next.js butuh return ini meskipun redirect terjadi sebelumnya
   return { message: "Berhasil" };
 }
 
-export async function deleteUser(userId: number) {
+// ✅ PERBAIKAN DI SINI:
+// Ubah (userId: number) menjadi (userId: string)
+export async function deleteUser(userId: string) {
   try {
     // 1. Eksekusi Hapus di DB
     await db.delete(users).where(eq(users.id, userId));

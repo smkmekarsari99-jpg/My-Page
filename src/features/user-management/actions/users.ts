@@ -1,4 +1,4 @@
-import { users } from "@/src/features/login/_db/schema";
+import { users } from "@/src/db/schema";
 import { InferSelectModel, InferInsertModel } from "drizzle-orm";
 
 // Tipe untuk data yang DIAMBIL dari database (Select)

@@ -6,14 +6,10 @@ import gsap from "gsap";
 import { Edit, Trash2, UserCog } from "lucide-react";
 import Link from "next/link";
 import { useRef, useTransition } from "react";
+import { type InferSelectModel } from "drizzle-orm";
+import { users } from "@/src/db/schema";
 
-type User = {
-  id: number;
-  name: string;
-  email: string;
-  role: "admin" | "guru" | "siswa" | "staff" | string;
-  createdAt: Date | null;
-};
+type User = InferSelectModel<typeof users>;
 
 export default function UserTable({ data }: { data: User[] }) {
   const tableRef = useRef<HTMLDivElement>(null);
@@ -38,7 +34,7 @@ export default function UserTable({ data }: { data: User[] }) {
     { scope: tableRef, dependencies: [data] },
   );
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (id: string) => {
     if (confirm("Apakah Anda yakin ingin menghapus user ini?")) {
       startTransition(async () => {
         await deleteUser(id);
