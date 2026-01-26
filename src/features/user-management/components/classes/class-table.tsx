@@ -1,3 +1,5 @@
+// C:\Users\USER\Documents\Landing Page Meksa\landing-page\src\features\user-management\components\classes\class-table.tsx
+
 "use client";
 
 import { useRef, useEffect } from "react";

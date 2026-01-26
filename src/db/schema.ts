@@ -242,14 +242,29 @@ export const attendanceRelations = relations(attendance, ({ one }) => ({
 // 6. EXPORT TYPES (HELPER)
 // =========================================
 
+// Tipe dasar tabel (Raw Data)
 export type Class = InferSelectModel<typeof classes>;
 export type NewClass = InferInsertModel<typeof classes>;
+export type Student = InferSelectModel<typeof studentProfiles>;
 
-// Tipe Helper untuk Absensi
+// Tipe Helper untuk Absensi & Setting
 export type Attendance = InferSelectModel<typeof attendance>;
 export type SchoolSettings = InferSelectModel<typeof schoolSettings>;
 
-export type StudentWithDetails = InferSelectModel<typeof studentProfiles> & {
+// Tipe KOMPLEKS (Data + Relasi) - KEMBALIKAN INI
+// Gunakan ini saat fetch data di halaman Dashboard untuk Table
+export type ClassWithDetails = Class & {
+  homeroomTeacher: {
+    id: string;
+    name: string;
+    email: string;
+    image: string | null;
+  } | null;
+  // Nanti kita bisa tambah count siswa di sini
+  studentCount?: number;
+};
+
+export type StudentWithDetails = Student & {
   user: {
     name: string;
     email: string;
