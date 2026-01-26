@@ -1,3 +1,5 @@
+// C:\Users\USER\Documents\Landing Page Meksa\landing-page\src\features\dashboard\_components\Sidebar.tsx
+
 "use client";
 
 import Link from "next/link";
