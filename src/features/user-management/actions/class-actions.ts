@@ -1,3 +1,5 @@
+// C:\Users\USER\Documents\Landing Page Meksa\landing-page\src\features\user-management\actions\class-actions.ts
+
 "use server";
 
 import { db } from "@/src/db";
@@ -160,5 +162,21 @@ export async function updateClass(
   } catch (error) {
     console.error("Update Error:", error);
     return { success: false, message: "Gagal memperbarui data kelas." };
+  }
+}
+
+// ==========================================
+// 7. GET ALL CLASSES (Untuk Dropdown & List)
+// ==========================================
+export async function getClasses() {
+  try {
+    // Mengambil semua kelas, diurutkan berdasarkan nama (A-Z)
+    const data = await db.query.classes.findMany({
+      orderBy: (classes, { asc }) => [asc(classes.name)],
+    });
+    return data;
+  } catch (error) {
+    console.error("Error fetching classes:", error);
+    return []; // Return array kosong jika error agar page tidak crash
   }
 }
