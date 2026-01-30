@@ -1,3 +1,5 @@
+// C:\Users\USER\Documents\Landing Page Meksa\landing-page\src\app\dashboard\page.tsx
+
 import { auth } from "@/src/auth";
 import { DashboardOverview } from "@/src/features/dashboard/_components/Overview";
 

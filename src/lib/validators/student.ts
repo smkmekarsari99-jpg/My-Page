@@ -1,3 +1,5 @@
+// C:\Users\USER\Documents\Landing Page Meksa\landing-page\src\lib\validators\student.ts
+
 import { z } from "zod";
 
 export const studentSchema = z.object({

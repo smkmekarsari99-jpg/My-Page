@@ -4,22 +4,38 @@ import {
   BookOpenIcon,
   CalendarIcon,
   CurrencyDollarIcon,
-} from "@heroicons/react/24/outline"; // Pastikan install heroicons: npm i @heroicons/react
+  QrCodeIcon,
+  AcademicCapIcon, // 1. [TAMBAHKAN INI] Icon Topi Toga untuk Siswa
+} from "@heroicons/react/24/outline";
 
-export type UserRole = "admin" | "guru" | "siswa";
+export type UserRole = "admin" | "guru" | "siswa" | "staff";
 
 export const MENU_ITEMS = [
   {
     name: "Dashboard",
     href: "/dashboard",
     icon: HomeIcon,
-    roles: ["admin", "guru", "siswa"], // Semua bisa lihat
+    roles: ["admin", "guru", "siswa", "staff"],
   },
   {
-    name: "Manajemen User",
+    name: "Scan Absensi",
+    href: "/dashboard/scanner",
+    icon: QrCodeIcon,
+    roles: ["admin", "guru", "staff"],
+  },
+  // --- MENU BARU DIMULAI ---
+  {
+    name: "Manajemen Siswa", // Nama Menu
+    href: "/dashboard/students", // Link ke folder page.tsx kamu
+    icon: AcademicCapIcon, // Icon Topi Toga
+    roles: ["admin", "guru"], // Admin dan Guru biasanya butuh akses ini
+  },
+  // --- MENU BARU SELESAI ---
+  {
+    name: "Manajemen User", // Ini bisa dipakai untuk manage Guru/Staff/Admin
     href: "/dashboard/users",
     icon: UsersIcon,
-    roles: ["admin"], // Hanya admin
+    roles: ["admin"],
   },
   {
     name: "Manajemen Kelas",
@@ -37,6 +53,6 @@ export const MENU_ITEMS = [
     name: "Keuangan SPP",
     href: "/dashboard/finance",
     icon: CurrencyDollarIcon,
-    roles: ["admin"],
+    roles: ["admin", "staff"],
   },
 ];

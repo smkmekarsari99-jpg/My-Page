@@ -1,3 +1,5 @@
+// C:\Users\USER\Documents\Landing Page Meksa\landing-page\src\db\schema.ts
+
 import {
   pgTable,
   serial,
